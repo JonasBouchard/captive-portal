@@ -11,5 +11,6 @@ chmod +x captive-portal.sh
 
 ## Usage
 ```bash
+cd
 ./captive-portal/captive-portal.sh
 ```
