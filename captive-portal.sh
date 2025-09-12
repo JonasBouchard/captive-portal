@@ -41,8 +41,8 @@
 # - IFACE:      Network interface hint (used only for logging).
 #
 # USAGE
-#   chmod +x captive-login.sh
-#   ./captive-login.sh
+#   chmod +x captive-portal.sh
+#   ./captive-portal.sh
 #   EMAIL="me@example.com" FULLNAME="Jane Doe" ./captive-login.sh
 #
 set -Eeuo pipefail
