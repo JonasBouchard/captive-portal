@@ -318,7 +318,9 @@ main() {
     portal_url=$(awk "
       BEGIN{IGNORECASE=1}
       /https?:\\/\\/[^\"' ]*(splash|login|portal|guest|captive|network-auth)[^\"' ]*/ {
-        match(\$0, /https?:\\/\\/[^\"' )]+/, m); print m[0]; exit
+        if (match(\$0, /https?:\\/\\/[^\"' )]+/)) {
+          print substr(\$0, RSTART, RLENGTH); exit
+        }
       }" "$html_file")
   else
     portal_url="$location"
