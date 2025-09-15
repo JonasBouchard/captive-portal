@@ -80,7 +80,16 @@ curl_base() {
   curl -sS -k "${CURL_DEBUG[@]}" \
        -A "$UA" \
        -b "$COOKIE_JAR" -c "$COOKIE_JAR" \
-       "$@"
+        "$@"
+}
+
+have_network() {
+  # Quick check to ensure basic network connectivity without relying on DNS.
+  # Uses a direct IP so that DNS failure is detected before proceeding.
+  if curl_base --max-time 3 -o /dev/null "http://1.1.1.1" >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
 }
 
 have_internet() {
@@ -301,6 +310,10 @@ meraki_continue_grant() {
 
 main() {
   log "Starting captive portal check (iface=${IFACE:-unknown})"
+  if ! have_network; then
+    log "No network connectivity (unable to reach 1.1.1.1)."
+    exit 1
+  fi
   if have_internet; then
     log "Internet already available. Nothing to do."
     exit 0
