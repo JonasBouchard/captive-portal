@@ -313,11 +313,13 @@ main() {
     log "No redirect Location header; attempting to fetch trigger URL body."
     html_file="$(get_html "$TRIGGER_URL")"
     # Try to find a link that looks like a splash/login portal:
-    portal_url=$(awk '
+    # Use double quotes for the AWK program to avoid complex single-quote
+    # escaping which previously caused syntax errors on some systems.
+    portal_url=$(awk "
       BEGIN{IGNORECASE=1}
-      /https?:\/\/[^"'\'' ]*(splash|login|portal|guest|captive|network-auth)[^"'\'' ]*/ {
-        match($0, /https?:\/\/[^"'\'' )]+/, m); print m[0]; exit
-      }' "$html_file")
+      /https?:\\/\\/[^\"' ]*(splash|login|portal|guest|captive|network-auth)[^\"' ]*/ {
+        match(\$0, /https?:\\/\\/[^\"' )]+/, m); print m[0]; exit
+      }" "$html_file")
   else
     portal_url="$location"
   fi
