@@ -140,8 +140,12 @@ get_html() {
   local url="$1"
   local out="${WORKDIR}/portal.html"
   log "Fetching portal page: $url"
-  curl_base -L "$url" -o "$out" || true
-  printf "%s" "$out"
+  if curl_base -L "$url" -o "$out"; then
+    printf "%s" "$out"
+  else
+    log "Failed to fetch $url"
+    return 1
+  fi
 }
 
 find_first_form_action() {
@@ -311,7 +315,11 @@ main() {
   if [[ -z "$location" ]]; then
     # Some portals do inline HTML interception; try fetching body anyway
     log "No redirect Location header; attempting to fetch trigger URL body."
-    html_file="$(get_html "$TRIGGER_URL")"
+    html_file="$(get_html "$TRIGGER_URL" || true)"
+    if [[ -z "$html_file" || ! -s "$html_file" ]]; then
+      log "Failed to fetch trigger URL body."
+      exit 2
+    fi
     # Try to find a link that looks like a splash/login portal:
     # Use double quotes for the AWK program to avoid complex single-quote
     # escaping which previously caused syntax errors on some systems.
@@ -345,7 +353,11 @@ main() {
   fi
 
   # Generic best-effort submit (accept terms / continue)
-  html_file="$(get_html "$portal_url")"
+  html_file="$(get_html "$portal_url" || true)"
+  if [[ -z "$html_file" || ! -s "$html_file" ]]; then
+    log "Failed to fetch portal page."
+    exit 2
+  fi
   submit_generic_form "$html_file" "$portal_url"
 
   # Final connectivity check
